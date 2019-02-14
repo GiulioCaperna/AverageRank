@@ -1,8 +1,9 @@
 ##Code to compute the method proposed by Rainer Brüggemann
-##References used: #1, #2 and #4 (Of the list presented in the Readme file
+##References used: #1, #2 and #4 (of the list presented in the Readme file)
 
 library(parsec)
 
+##
 RLPOMext=function(data){
   obs_strings<-apply(X = data,MARGIN = 1,FUN = toString)
   labels=gsub(", ", "", obs_strings)
