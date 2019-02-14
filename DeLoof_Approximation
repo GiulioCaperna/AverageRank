@@ -1,0 +1,59 @@
+##Code to compute the approximated Average Rank as proposed in De Loof et al (2011)
+##References used: #3, #2 and #4 (of the list presented in the Readme file)
+
+library(parsec)
+
+## Here the basic function for the approximation, a more efficient one is under development.
+## In the next large release, this approximation function and the one proposed by Brüggemann and Carlsen (2011) 
+## will be included in a unique code.
+## Please be aware that the computation time increases almost exponentially with the number of profiles of the poset.
+
+deloof=function(data){
+  obs_strings<-apply(X = data,MARGIN = 1,FUN = toString)
+  labels=gsub(", ", "", obs_strings)
+  ranks_list=rep(NA,length(labels))
+  set_profiles=pop2prof(data,sep="")
+  zeta=getzeta(set_profiles)
+  list_prof=names(set_profiles$freq)
+  num_prof=length(list_prof)
+  avrank=rep(NA,num_prof)
+  incomparables=incomp(zeta)
+  mutprob1=matrix(0,num_prof,num_prof)
+  colnames(mutprob1)=list_prof
+  rownames(mutprob1)=list_prof  
+  downsets= apply(zeta, 2, function(x) sum(x)-1)
+  upsets= apply(zeta, 1, function(x) sum(x)-1)
+  for (rig1 in 1:num_prof){
+    for (col1 in 1:rig1){
+      if (incomparables[rig1,col1]==TRUE){
+        prob=((downsets[rig1]+1)*(upsets[col1]+1))/((downsets[rig1]+1)*(upsets[col1]+1)+(downsets[col1]+1)*(upsets[rig1]+1))
+        mutprob1[rig1,col1]=prob
+        mutprob1[col1,rig1]=1-prob
+      }
+    }
+  }
+  down2=downsets+apply(mutprob1,1,sum)
+  up2=upsets+apply(mutprob1,2,sum)
+  print("first-level mutual rank probabilities computed")
+  mutprob2=matrix(0,num_prof,num_prof)
+  colnames(mutprob2)=list_prof
+  rownames(mutprob2)=list_prof  
+  
+  for (rig1 in 1:num_prof){
+    for (col1 in 1:rig1){
+      if (incomparables[rig1,col1]==TRUE){
+        prob=((down2[rig1]+1)*(up2[col1]+1))/((down2[rig1]+1)*(up2[col1]+1)+(down2[col1]+1)*(up2[rig1]+1))
+        mutprob2[rig1,col1]=prob
+        mutprob2[col1,rig1]=1-prob
+      }
+    }
+  }
+  print("second-level mutual rank probabilities computed")
+  result= downsets+1+ apply(mutprob2,1,sum)
+  
+  for (i in 1: num_prof){
+    ranks_list[which(labels==list_prof[i])]=result[i]
+  }
+  names(ranks_list)=labels
+  return((ranks_list))  
+}
