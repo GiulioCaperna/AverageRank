@@ -5,6 +5,7 @@ library(parsec)
 
 ## Here the basic function for the LPOMext proposed by Brüggemann and Carlsen (2011), a more performing one is under development.
 ## In the next large release this approximation function and the one proposed by De Loof et al (2011) will be included in a unique code.
+## Please be aware that the computation time increases almost exponentially with the number of profiles of the poset.
 RLPOMext=function(data){
   obs_strings<-apply(X = data,MARGIN = 1,FUN = toString)
   labels=gsub(", ", "", obs_strings)
